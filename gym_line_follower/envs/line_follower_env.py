@@ -3,9 +3,12 @@ import json
 import warnings
 from time import time, sleep
 
-import gym
-from gym import spaces
-from gym.utils import seeding
+# import gym
+# from gym import spaces
+# from gym.utils import seeding
+import gymnasium as gym
+from gymnasium import spaces
+from gymnasium.utils import seeding
 import numpy as np
 import pybullet as p
 
@@ -24,13 +27,14 @@ def fig2rgb_array(fig):
 
 
 class LineFollowerEnv(gym.Env):
-    metadata = {"render.modes": ["human", "gui", "rgb_array", "pov"]}
+    # metadata = {"render.modes": ["human", "gui", "rgb_array", "pov"]}
+    metadata = {"render_modes": ["human", "gui", "rgb_array", "pov"], "render_fps": 25}
 
     SUPPORTED_OBSV_TYPE = ["points_visible", "points_latch", "points_latch_bool", "camera"]
 
     def __init__(self, gui=True, nb_cam_pts=8, sub_steps=10, sim_time_step=1 / 250,
                  max_track_err=0.3, power_limit=0.4, max_time=60, config=None, randomize=True, obsv_type="points_latch",
-                 track=None, track_render_params=None):
+                 track=None, track_render_params=None, render_mode="human"):
         """
         Create environment.
         :param gui: True to enable pybullet OpenGL GUI
@@ -76,6 +80,7 @@ class LineFollowerEnv(gym.Env):
         self.obsv_type = obsv_type.lower()
         self.track_render_params = track_render_params
         self.preset_track = track
+        self.render_mode = render_mode
 
         self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
 
@@ -124,7 +129,8 @@ class LineFollowerEnv(gym.Env):
         self.plot = None
         self.seed()
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
+        super().reset(seed=seed, options=options) # added by dlkh
         self.step_counter = 0
         self.config.randomize()
 
@@ -139,7 +145,7 @@ class LineFollowerEnv(gym.Env):
         if self.preset_track:
             self.track = self.preset_track
         else:
-            self.track = Track.generate(1.75, hw_ratio=0.7, seed=None if self.randomize else 4125,
+            self.track = Track.generate(1.75, hw_ratio=0.7, seed=None if self.randomize else seed, #4125,
                                         spikeyness=0.3, nb_checkpoints=500, render_params=self.track_render_params)
 
         start_yaw = self.track.start_angle
@@ -166,7 +172,7 @@ class LineFollowerEnv(gym.Env):
             obsv = self.follower_bot.step(self.track)
             if self.obsv_type == "latch_bool":
                 obsv = [obsv, 1.]
-            return obsv
+            return np.array(obsv, dtype=np.float32), self._get_info()
 
     def step(self, action):
         action = self.speed_limit * np.array(action)
@@ -218,27 +224,31 @@ class LineFollowerEnv(gym.Env):
         reward -= 0.2
 
         done = False
+        truncated = False
         if self.track.done:
+            reward += 100
             done = True
             print("TRACK DONE")
         elif abs(self.position_on_track - self.track.progress) > 0.5:
-            reward = -100
-            done = True
+            reward -= 100
+            truncated = True
             print("PROGRESS DISTANCE LIMIT")
         elif track_err > self.max_track_err:
-            reward = -100.
-            done = True
+            reward -= 100.
+            truncated = True
             print("TRACK DISTANCE LIMIT")
         elif self.step_counter > self.max_steps:
-            done = True
+            reward -= 100.
+            truncated = True
             print("TIME LIMIT")
 
         info = self._get_info()
         self.step_counter += 1
         self.done = done
-        return observation, reward, done, info
+        return np.array(observation, dtype=np.float32), reward, done, truncated, info
 
     def render(self, mode='human'):
+        mode = self.render_mode
         if self.plot is None and mode in ["human", "rgb_array"]:
             global plt
             import matplotlib

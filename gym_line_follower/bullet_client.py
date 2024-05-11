@@ -12,6 +12,7 @@ class BulletClient(object):
         if self._client < 0:
             print("options=", options)
             self._client = pybullet.connect(connection_mode, options=options)
+            print("made client")
         self._shapes = {}
 
     def __del__(self):

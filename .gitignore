@@ -1,0 +1,25 @@
+# Ignore system files
+.DS_Store
+
+# Ignore Python virtual environment
+venv/
+
+# Ignore compiled Python files
+*.pyc
+
+# Ignore logs
+*.log
+
+# Ignore cache files
+__pycache__/
+
+# Ignore IDE-specific files
+.idea/
+.vscode/
+
+# Ignore package dependencies
+node_modules/
+build/
+dist/
+*egg-info/
+*_tensorboard/

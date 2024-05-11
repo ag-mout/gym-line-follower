@@ -1,4 +1,5 @@
-from gym.envs.registration import register
+# from gym.envs.registration import register
+from gymnasium import register
 
 register(
     id='LineFollower-v0',

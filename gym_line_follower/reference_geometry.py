@@ -76,7 +76,12 @@ class CameraWindow(ReferenceGeometry):
             multipoint = points
         visible = multipoint.intersection(self.geometry)
         if return_coords:
-            return np.array(visible).reshape((-1, 2))
+            if visible.is_empty or not isinstance(visible, MultiPoint):
+                return np.array([])
+            _visible = np.array([(p.x, p.y) for p in visible.geoms]) # Convert back to numpy array
+            # print(_visible.shape) 
+            # return np.array(visible).reshape((-1, 2))
+            return _visible
         else:
             return visible
 

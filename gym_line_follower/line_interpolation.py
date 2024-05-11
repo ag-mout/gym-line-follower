@@ -74,7 +74,9 @@ def sort_points(points, origin=(0, 0)):
     :return: sorted points, array
     """
     origin = np.array(origin)
-    points = np.array(points)
+    # points = np.array(points)
+    points = np.array([(p.x, p.y) for p in points.item().geoms])
+    # print([p for p in points.item().geoms])
     sorted = np.empty((0, 2), dtype=np.float32)
 
     # Find point nearest to origin

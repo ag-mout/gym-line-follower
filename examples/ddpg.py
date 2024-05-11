@@ -6,6 +6,7 @@ import os
 import pickle
 
 from keras.models import Sequential, Model
+# from keras.models import Sequential, Model
 from keras.layers import Dense, Flatten, Concatenate, Input, Dropout
 from keras.optimizers import Adam, RMSprop
 from keras.callbacks import TensorBoard
