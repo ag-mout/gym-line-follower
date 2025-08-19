@@ -21,9 +21,9 @@ from gym_line_follower.randomizer_dict import RandomizerDict
 
 def fig2rgb_array(fig):
     fig.canvas.draw()
-    buf = fig.canvas.tostring_rgb()
+    buf = fig.canvas.buffer_rgba()
     ncols, nrows = fig.canvas.get_width_height()
-    return np.fromstring(buf, dtype=np.uint8).reshape(nrows, ncols, 3)
+    return np.array(buf.tolist(), dtype=np.uint8).reshape(nrows, ncols, 4)
 
 
 class LineFollowerEnv(gym.Env):
@@ -288,8 +288,8 @@ class LineFollowerEnv(gym.Env):
         if mode in ["human", "rgb_array"]:
             # Plot data
             (x, y), yaw = self.follower_bot.get_position()
-            self.plot["pos_line"].set_xdata(x)
-            self.plot["pos_line"].set_ydata(y)
+            self.plot["pos_line"].set_xdata([x])
+            self.plot["pos_line"].set_ydata([y])
 
             self.plot["win_line"].set_xdata(self.follower_bot.cam_window.plottable[0])
             self.plot["win_line"].set_ydata(self.follower_bot.cam_window.plottable[1])
@@ -304,11 +304,11 @@ class LineFollowerEnv(gym.Env):
             self.plot["vis_pts_line"].set_xdata(vis_pts[:, 0])
             self.plot["vis_pts_line"].set_ydata(vis_pts[:, 1])
 
-            self.plot["track_ref_line"].set_xdata(self.follower_bot.track_ref_point.plottable[0])
-            self.plot["track_ref_line"].set_ydata(self.follower_bot.track_ref_point.plottable[1])
+            self.plot["track_ref_line"].set_xdata([self.follower_bot.track_ref_point.plottable[0]])
+            self.plot["track_ref_line"].set_ydata([self.follower_bot.track_ref_point.plottable[1]])
 
-            self.plot["progress_line"].set_xdata(self.track.pts[0:self.track.progress_idx, 0])
-            self.plot["progress_line"].set_ydata(self.track.pts[0:self.track.progress_idx, 1])
+            self.plot["progress_line"].set_xdata([self.track.pts[0:self.track.progress_idx, 0]])
+            self.plot["progress_line"].set_ydata([self.track.pts[0:self.track.progress_idx, 1]])
 
         if mode == "human":
             plt.draw()
