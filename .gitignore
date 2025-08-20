@@ -2,7 +2,7 @@
 .DS_Store
 
 # Ignore Python virtual environment
-venv/
+.venv/
 
 # Ignore compiled Python files
 *.pyc
