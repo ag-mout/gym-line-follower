@@ -19,7 +19,7 @@ env = gym.make('LineFollower-v0', gui = True, render_mode = 'rgb_array')
 vec_env = DummyVecEnv([lambda: env])
 
 train_model = False
-model_type = "ddpg" # "ppo" or "ddpg
+model_type = "ppo" # "ppo" or "ddpg
 
 model_name = model_type +"_line_follower"
 if train_model:
@@ -49,7 +49,7 @@ if train_model:
         eval_callback = EvalCallback(env, eval_freq=1000, callback_after_eval=stop_train_callback, verbose=1)
 
         model = PPO("MlpPolicy", vec_env, verbose=1, tensorboard_log="./ppo_line_follower_tensorboard/")
-        model.learn(total_timesteps=10000, callback=eval_callback)
+        model.learn(total_timesteps=100_000, callback=eval_callback)
 
         # Evaluate the agent
         mean_reward, std_reward = evaluate_policy(model, model.get_env(), n_eval_episodes=100)
