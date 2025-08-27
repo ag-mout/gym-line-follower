@@ -23,7 +23,8 @@ def fig2rgb_array(fig):
     fig.canvas.draw()
     buf = fig.canvas.buffer_rgba()
     ncols, nrows = fig.canvas.get_width_height()
-    return np.array(buf.tolist(), dtype=np.uint8).reshape(nrows, ncols, 4)
+    # drops the A matrix for transparency effects, returning an RGB_array
+    return np.array(buf.tolist(), dtype=np.uint8).reshape(nrows, ncols, 4)[:,:,0:3]
 
 
 class LineFollowerEnv(gym.Env):
