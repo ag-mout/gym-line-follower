@@ -213,6 +213,9 @@ class LineFollowerEnv(gym.Env):
         track_err = self.track.distance_from_point(self.follower_bot.pos[0])
         track_err_norm = track_err * (1.0 / self.max_track_err)
 
+        # Distance penalty
+        reward -= 2**(track_err**2)-1
+
         self.position_on_track += self.track.length_along_track(self.follower_bot.prev_pos[0], self.follower_bot.pos[0])
 
         # Track progress
@@ -221,6 +224,9 @@ class LineFollowerEnv(gym.Env):
             checkpoints_reached = self.track.update_progress(self.position_on_track)
             reward += checkpoints_reached * checkpoint_reward * (1.0 - track_err_norm) ** 2
 
+        # Speed reward
+        reward += action.mean()-0.5
+        
         # Time penalty
         reward -= 0.2
 
